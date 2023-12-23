@@ -1,0 +1,82 @@
+﻿@model IEnumerable<WebBanHang.Models.ShoppingCartItem>
+@using WebBanHang.Common
+<table class="table">
+    <tr class="text-center">
+        <th>STT</th>
+        <th>Ảnh sản phẩm</th>
+        <th>Tên sản phẩm</th>
+        <th>Danh mục</th>
+        <th>Giá</th>
+        <th style="width:100px;">Số lượng</th>
+        <th>Thành tiền</th>
+        <th style="width:200px;"></th>
+    </tr>
+    @if (Model != null && Model.Any())
+    {
+        var i = 0;
+        var tongtien = decimal.Zero;
+        foreach (var item in Model)
+        {
+            if(item.Quantity > 0)
+            {
+                tongtien += item.TotalPrice;
+            }
+            else
+            {
+
+                tongtien += item.TotalPrice * 0;
+            }
+            //tongtien += item.TotalPrice;
+            <tr class="text-center" id="trow_@item.ProductId">
+                <td>@(i+1)</td>
+                <td><img src="@item.ProductImg" width="60" /></td>
+                <td>
+                    <a href="/chi-tiet/@item.Alias-p@(item.ProductId)">
+                        @item.ProductName
+                    </a>
+                </td>
+                <td>@item.CategoryName</td>
+                <td>@Common.FormatNumber(item.Price, 0)</td>
+                <td>
+                    @if (item.Quantity > 0) {
+                        <input type="number" class="form-control" id=" Quantity_@item.ProductId" value="@item.Quantity">
+                    }
+                    else
+                    {
+                       <input type="number" class="form-control" id=" Quantity_@item.ProductId" value="0">
+                    }
+
+                </td>
+                <td>
+
+                    @if (item.Quantity > 0)
+                    {
+                        @Common.FormatNumber(item.TotalPrice, 2)
+                    }
+                    else
+                    {
+                        @Common.FormatNumber(item.TotalPrice * 0)
+                    }
+                </td>
+
+                <td>
+                    <a href="#" data-id="@item.ProductId" class="btn btn-sm btn-danger btnDelete">Xoá</a>
+                    <a href="#" data-id="@item.ProductId" class="btn btn-sm btn-success btnUpdate">Cập nhật</a>
+                </td>
+            </tr>
+            i++;
+        }
+        <tr>
+            <th colspan="6" class="text-right">Tổng: </th>
+            <th class="text-center">@Common.FormatNumber(tongtien, 0)</th>
+            <th></th>
+        </tr>
+        
+    }
+    else
+    {
+        <tr>
+            <th colspan="7">Không có sản phẩm trong giỏ hàng!!!</th>
+        </tr>
+    }
+</table>
