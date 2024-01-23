@@ -12,9 +12,49 @@ using WebBanHang.Models.Payments;
 
 namespace WebBanHang.Controllers
 {
+    [Authorize]
     public class ShoppingCartController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
+
+        private ApplicationSignInManager _signInManager;
+        private ApplicationUserManager _userManager;
+
+        public ShoppingCartController()
+        {
+        }
+
+        public ShoppingCartController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
+        {
+            UserManager = userManager;
+            SignInManager = signInManager;
+        }
+
+        public ApplicationSignInManager SignInManager
+        {
+            get
+            {
+                return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
+            }
+            private set
+            {
+                _signInManager = value;
+            }
+        }
+
+        public ApplicationUserManager UserManager
+        {
+            get
+            {
+                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+            private set
+            {
+                _userManager = value;
+            }
+        }
+
+        [AllowAnonymous]
         // GET: ShoppingCart
         public ActionResult Index()
         {
@@ -85,7 +125,7 @@ namespace WebBanHang.Controllers
             //var a = UrlPayment(0, "DH3574");
             return View();
         }
-
+        [AllowAnonymous]
         public ActionResult CheckOut()
         {
             ShoppingCart cart = (ShoppingCart)Session["Cart"];
@@ -95,12 +135,12 @@ namespace WebBanHang.Controllers
             }
             return View();
         }
-
+        [AllowAnonymous]
         public ActionResult CheckOutSuccess()
         {
             return View();
         }
-
+        [AllowAnonymous]
         public ActionResult Partial_Item_ThanhToan()
         {
             ShoppingCart cart = (ShoppingCart)Session["Cart"];
@@ -110,7 +150,7 @@ namespace WebBanHang.Controllers
             }
             return PartialView();
         }
-
+        [AllowAnonymous]
         public ActionResult Partial_Item_Cart()
         {
             ShoppingCart cart = (ShoppingCart)Session["Cart"];
@@ -120,7 +160,7 @@ namespace WebBanHang.Controllers
             }
             return PartialView();
         }
-
+        [AllowAnonymous]
         public ActionResult ShowCount()
         {
             ShoppingCart cart = (ShoppingCart)Session["Cart"];
@@ -130,14 +170,19 @@ namespace WebBanHang.Controllers
             }
             return Json(new{Count = 0 }, JsonRequestBehavior.AllowGet);
         }
-
+        [AllowAnonymous]
         public ActionResult Partial_CheckOut()
         {
-            
+            var user = UserManager.FindByNameAsync(User.Identity.Name).Result;
+            if (user != null)
+            {
+                ViewBag.User = user;
+            }
             return PartialView();
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public ActionResult CheckOut(OrderViewModel req)
         {
@@ -153,17 +198,30 @@ namespace WebBanHang.Controllers
                     order.Phone = req.Phone;
                     order.Address = req.Address;
                     order.Email = req.Email;
+
+                    order.Status = 1;
                     cart.Items.ForEach(x => order.OrderDetails.Add(new OrderDetail
                     {
                         ProductId = x.ProductId,
                         Quantity = x.Quantity,
                         Price = x.Price
                     }));
+                    foreach(var items in cart.Items)
+                    {
+                        var item = db.Products.Find(items.ProductId);
+                        if (item != null)
+                        {
+                            item.Quantity -= items.Quantity;
+                            db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                        }
+                    }
                     order.TotalAmount = cart.Items.Sum(x => (x.Price * x.Quantity));
                     order.TypePayment = req.TypePayment;
                     order.CreatedDate = DateTime.Now;
                     order.ModifiedDate = DateTime.Now;
                     order.CreatedBy = req.Phone;
+                    if (User.Identity.IsAuthenticated)
+                        order.CustomerId = User.Identity.GetUserId();
                     Random rd = new Random();
                     order.Code = "DH" + rd.Next(0, 9) + rd.Next(0, 9) + rd.Next(0, 9) + rd.Next(0, 9);
                     db.Orders.Add(order);
@@ -207,12 +265,7 @@ namespace WebBanHang.Controllers
                     contentAdmin = contentAdmin.Replace("{{TongTien}}", WebBanHang.Common.Common.FormatNumber(TongTien, 0));
                     WebBanHang.Common.Common.SendMail("ShopOnline", "Đơn hàng mới #" + order.Code, contentAdmin.ToString(), ConfigurationManager.AppSettings["EmailAdmin"]);
                     cart.ClearCart();
-                    //code = new { Success = true, msg = " thành công", Code = 1, Url = "" };
-                    //if (req.TypePayment == 2)
-                    //{
-                    //    var url = UrlPayment(req.TypePaymentVN, order.Code);
-                    //    code = new { Success = true, Code = req.TypePayment, Url = url };
-                    //}
+                    
                     code = new { Success = true, Code = req.TypePayment, Url = "" };
                     //var url = "";
                     if (req.TypePayment == 2)
@@ -220,12 +273,12 @@ namespace WebBanHang.Controllers
                         var url = UrlPayment(req.TypePaymentVN, order.Code);
                         code = new { Success = true, Code = req.TypePayment, Url = url };
                     }
-                    return RedirectToAction("CheckOutSuccess");
+                    //return RedirectToAction("CheckOutSuccess");
                 }
             }
             return Json(code);
         }
-
+        [AllowAnonymous]
         [HttpPost]
         public ActionResult AddToCart(int id, int quantity)
         {
@@ -264,7 +317,7 @@ namespace WebBanHang.Controllers
 
             return Json(code);
         }
-
+        [AllowAnonymous]
         [HttpPost]
         public ActionResult Update(int id, int quantity)
         {
@@ -276,7 +329,7 @@ namespace WebBanHang.Controllers
             }
             return Json(new { Success = false });
         }
-
+        [AllowAnonymous]
         [HttpPost]
         public ActionResult Delete(int id)
         {
@@ -294,7 +347,7 @@ namespace WebBanHang.Controllers
             }
             return Json(code);
         }
-
+        [AllowAnonymous]
         [HttpPost]
         public ActionResult DeleteAll()
         {

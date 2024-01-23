@@ -1,6 +1,7 @@
 ﻿@model PagedList.IPagedList<WebBanHang.Models.EF.Order>
 @using PagedList.Mvc;
 @using PagedList;
+@using COMExcel = Microsoft.Office.Interop.Excel;
 @{
     ViewBag.Title = "Danh sách đơn hàng";
 }
@@ -10,7 +11,7 @@
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="/admin" class="nav-link">Trang chủ</a>
+            <a href="/admin/home" class="nav-link">Trang chủ</a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
             <a href="/admin/order" class="nav-link">Danh sách đơn hàng</a>
@@ -59,7 +60,10 @@
                                 <td>@item.CreatedDate.ToString("dd/MM/yyyy")</td>
                                 <td>
                                     <a href="/admin/order/view/@item.Id" class="btn btn-sm btn-success">Xem</a>
-                                    <a href="#" class="btn btn-sm btn-danger btnCapNhat" data-id="@item.Id">Cập nhật</a>
+                                    <a href="#" class="btn btn-sm btn-info btnCapNhat" data-id="@item.Id">Cập nhật</a>
+                                    <a href="#" data-id="@item.Id" class="btn btn-sm btn-danger btnDelete">Xoá</a>
+                                    <a href="#" data-id="@item.Id" class="btn btn-sm btn-dark btnExportExcel">In</a>
+
                                 </td>
                             </tr>
                             i++;
@@ -96,7 +100,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <input type="hidden" id="txtOrderId" value="0"/>
+                <input type="hidden" id="txtOrderId" value="0" />
                 <div class="form-group">
                     <label>Trạng thái</label>
                     <select class="form-control" id="ddTrangThai">
@@ -138,7 +142,44 @@
                     }
                 });
             });
+            $('body').on('click', '.btnDelete', function () {
+                var id = $(this).data("id");
+                var conf = confirm("Bạn có muốn xoá bản ghi này không?");
+                if (conf == true) {
+                    $.ajax({
+                        url: '/admin/order/Delete',
+                        type: 'POST',
+                        data: { id: id },
+                        success: function (rs) {
+                            if (rs.success) {
+                                $('#trow_' + id).remove();
+                                location.reload();
+                            }
+                        }
+                    });
+                }
+            });
+
+
+            $('body').on('click','.btnExportExcel', function () {
+                var id = $(this).data("id");
+                var conf = confirm("Bạn có muốn in bản ghi này không?");
+                if (conf == true) {
+                    $.ajax({
+                        datatype: 'json',
+                        type: 'POST',
+                        url: '/admin/order/Excel',
+                        data: { id: id },
+                        success: function (resp) {
+                            if (resp !== "") {
+                                location.href = "/Resource/ExportExcel/" + resp;
+                            }
+                        }
+                    });
+                }
+                
+            })
         });
-        
+
     </script>
-    }
+}

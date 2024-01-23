@@ -88,7 +88,7 @@
                     <h2>Danh sách sản phẩm</h2>
                 </div>
                 <div class="col-12">
-                    @Html.Action("Partial_SanPham", "Order", new {id = Model.Id})
+                    @Html.Action("Partial_SanPham", "Order", new { id = Model.Id })
                 </div>
             </div>
         </div>
@@ -99,6 +99,9 @@
         <!-- /.card-footer-->
     </div>
     <!-- /.card -->
-
+    <div class="card-tools">
+        <a href="/admin/order" class="btn btn-primary" id="btnIn">Quay lại</a>
+    </div>
 </section>
 <!-- /.content -->
+

@@ -58,11 +58,6 @@
 @section scripts{
     <script src="~/Content/assets/js/categories_custom.js"></script>
     <script>
-        //function Ofnailure(rs) {
-        //    if (!rs.Success) {
-        //        $('#show_success').html("Bạn mua hàng thất bại! Xin vui lòng thử lại");
-        //    }
-        //}
         function OnFailure(rs) {
             if (!rs.Success) {
                 $('#show_success').html("Bạn mua hàng thất bại! Xin vui lòng thử lại");
@@ -82,10 +77,10 @@
                         required: true
                     },
                     'Phone': {
-                        required:true
+                        required: true
                     },
                     'Address': {
-                        required:true
+                        required: true
                     },
                     'Email': {
                         required: true,
@@ -98,7 +93,7 @@
                     'Address': 'Bạn không để trống trường này',
                     'Email': 'Email chưa hợp lệ'
                 }
-            })
-        })
+            });
+        });
     </script>
 }

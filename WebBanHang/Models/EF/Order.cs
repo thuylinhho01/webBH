@@ -29,8 +29,9 @@ namespace WebBanHang.Models.EF
         public decimal TotalAmount { get; set; }
         public int Quantity { get; set; }
         public int TypePayment { get; set; }
-
-
+        public string CustomerId { get; set; }
+        public int Status { get; set; }
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+        public object ProductId { get; internal set; }
     }
 }

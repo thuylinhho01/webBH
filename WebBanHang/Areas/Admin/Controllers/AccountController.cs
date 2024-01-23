@@ -132,21 +132,24 @@ namespace WebBanHang.Areas.Admin.Controllers
                 if (result.Succeeded)
                 {
                     UserManager.AddToRole(user.Id, model.Role);
-                    //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-
-                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
-                    // Send an email with this link
-                    // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
-                    // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
-                    // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
-
                     return RedirectToAction("Index", "Home");
                 }
                 AddErrors(result);
             }
             ViewBag.Role = new SelectList(db.Roles.ToList(), "Name", "Name");
-            // If we got this far, something failed, redisplay form
             return View(model);
+        }
+        [HttpPost]
+        public async Task<ActionResult> DeleteAccount(string user, string id)
+        {
+            var code = new { Success = false };
+            var item = await _userManager.FindByIdAsync(id);
+            if (item != null)
+            {
+                var res = await _userManager.DeleteAsync(item);
+                code = new { Success = res.Succeeded };
+            }
+            return Json(code);
         }
 
         private IAuthenticationManager AuthenticationManager

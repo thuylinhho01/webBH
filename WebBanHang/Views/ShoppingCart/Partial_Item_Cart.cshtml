@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<WebBanHang.Models.ShoppingCartItem>
+
 @using WebBanHang.Common
 <table class="table">
     <tr class="text-center">
@@ -17,7 +18,7 @@
         var tongtien = decimal.Zero;
         foreach (var item in Model)
         {
-            if(item.Quantity > 0)
+            if (item.Quantity > 0)
             {
                 tongtien += item.TotalPrice;
             }
@@ -38,15 +39,18 @@
                 <td>@item.CategoryName</td>
                 <td>@Common.FormatNumber(item.Price, 0)</td>
                 <td>
-                    @if (item.Quantity > 0) {
-                        <input type="number" class="form-control" id=" Quantity_@item.ProductId" value="@item.Quantity">
-                    }
-                    else
-                    {
-                       <input type="number" class="form-control" id=" Quantity_@item.ProductId" value="0">
-                    }
+
+                    <input type="number" class="form-control" min="1" id=" Quantity_@item.ProductId" value="@item.Quantity">
+                    @*@if (item.Quantity > 0) {
+                            <input type="number" class="form-control" id=" Quantity_@item.ProductId" value="@item.Quantity">
+                        }
+                        else
+                        {
+                           <input type="number" class="form-control" id=" Quantity_@item.ProductId" value="0">
+                        }*@
 
                 </td>
+
                 <td>
 
                     @if (item.Quantity > 0)
@@ -71,7 +75,7 @@
             <th class="text-center">@Common.FormatNumber(tongtien, 0)</th>
             <th></th>
         </tr>
-        
+
     }
     else
     {

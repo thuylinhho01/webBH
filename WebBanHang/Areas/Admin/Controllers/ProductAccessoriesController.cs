@@ -9,6 +9,7 @@ using WebBanHang.Models;
 
 namespace WebBanHang.Areas.Admin.Controllers
 {
+    [Authorize(Roles = "Admin,Employee")]
     public class ProductAccessoriesController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();

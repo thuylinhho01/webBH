@@ -8,6 +8,7 @@ using WebBanHang.Models;
 
 namespace WebBanHang.Areas.Admin.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class StatisticalController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
